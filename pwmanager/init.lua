@@ -20,7 +20,7 @@
 
 pwmgr = {}
 
-local pwfilename = core.setting_get("pwfile")
+local pwfilename = core.settings:get("pwfile")
 if pwfilename == nil then
 	-- unfortunately, there is no core.get_path_user(), so we have to resort to this:
 	pwfilename = core.get_modpath() .. DIR_DELIM .. ".." .. DIR_DELIM .. "client" .. DIR_DELIM .."password_list.txt"

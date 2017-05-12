@@ -27,7 +27,7 @@ local basepath = core.get_builtin_path()
 defaulttexturedir = core.get_texturepath_share() .. DIR_DELIM .. "base" ..
 					DIR_DELIM .. "pack" .. DIR_DELIM
 
-if core.setting_get("pwm_debug") then
+if core.settings:get("pwm_debug") then
 	--display errors
 	dofile(basepath .. DIR_DELIM .. "pwmanager" .. DIR_DELIM .. "init.lua")
 else
@@ -135,9 +135,9 @@ local function init_globals()
 		menudata.worldlist:add_sort_mechanism("alphabetic", sort_worlds_alphabetic)
 		menudata.worldlist:set_sortmode("alphabetic")
 
-		if not core.setting_get("menu_last_game") then
-			local default_game = core.setting_get("default_game") or "minetest"
-			core.setting_set("menu_last_game", default_game)
+		if not core.settings:get("menu_last_game") then
+			local default_game = core.settings:get("default_game") or "minetest"
+			core.settings:set("menu_last_game", default_game)
 		end
 
 		mm_texture.init()
@@ -165,7 +165,7 @@ local function init_globals()
 	tv_main:set_fixed_size(false)
 
 	if PLATFORM ~= "Android" then
-		tv_main:set_tab(core.setting_get("maintab_LAST"))
+		tv_main:set_tab(core.settings:get("maintab_LAST"))
 	end
 	ui.set_default("maintab")
 	tv_main:show()
