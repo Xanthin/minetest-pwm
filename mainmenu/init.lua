@@ -25,9 +25,6 @@ mt_color_dark_green = "#25C191"
 local menupath = core.get_mainmenu_path()
 local basepath = core.get_builtin_path()
 local menustyle = core.settings:get("main_menu_style")
-if menustyle == "auto" then
-	menustyle = PLATFORM == "Android" and "simple" or "full"
-end
 defaulttexturedir = core.get_texturepath_share() .. DIR_DELIM .. "base" ..
 					DIR_DELIM .. "pack" .. DIR_DELIM
 
@@ -47,22 +44,22 @@ else
 		end
 	end
 end
-dofile(basepath .. "common" .. DIR_DELIM .. "async_event.lua")
-dofile(basepath .. "common" .. DIR_DELIM .. "filterlist.lua")
-dofile(basepath .. "fstk" .. DIR_DELIM .. "buttonbar.lua")
-dofile(basepath .. "fstk" .. DIR_DELIM .. "dialog.lua")
-dofile(basepath .. "fstk" .. DIR_DELIM .. "tabview.lua")
-dofile(basepath .. "fstk" .. DIR_DELIM .. "ui.lua")
+dofile(basepath .. DIR_DELIM .. "common" .. DIR_DELIM .. "async_event.lua")
+dofile(basepath .. DIR_DELIM .. "common" .. DIR_DELIM .. "filterlist.lua")
+dofile(basepath .. DIR_DELIM .. "fstk" .. DIR_DELIM .. "buttonbar.lua")
+dofile(basepath .. DIR_DELIM .. "fstk" .. DIR_DELIM .. "dialog.lua")
+dofile(basepath .. DIR_DELIM .. "fstk" .. DIR_DELIM .. "tabview.lua")
+dofile(basepath .. DIR_DELIM .. "fstk" .. DIR_DELIM .. "ui.lua")
 dofile(menupath .. DIR_DELIM .. "common.lua")
-dofile(menupath .. DIR_DELIM .. "gamemgr.lua")
-dofile(menupath .. DIR_DELIM .. "modmgr.lua")
+dofile(menupath .. DIR_DELIM .. "pkgmgr.lua")
 dofile(menupath .. DIR_DELIM .. "textures.lua")
 
 dofile(menupath .. DIR_DELIM .. "dlg_config_world.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_settings_advanced.lua")
+dofile(menupath .. DIR_DELIM .. "dlg_contentstore.lua")
 if menustyle ~= "simple" then
 	dofile(menupath .. DIR_DELIM .. "dlg_create_world.lua")
-	dofile(menupath .. DIR_DELIM .. "dlg_delete_mod.lua")
+	dofile(menupath .. DIR_DELIM .. "dlg_delete_content.lua")
 	dofile(menupath .. DIR_DELIM .. "dlg_delete_world.lua")
 	dofile(menupath .. DIR_DELIM .. "dlg_rename_modpack.lua")
 end
@@ -70,14 +67,13 @@ end
 local tabs = {}
 
 tabs.settings = dofile(menupath .. DIR_DELIM .. "tab_settings.lua")
-tabs.mods = dofile(menupath .. DIR_DELIM .. "tab_mods.lua")
-tabs.credits = dofile(menupath .. DIR_DELIM .. "tab_credits.lua")
+tabs.content  = dofile(menupath .. DIR_DELIM .. "tab_content.lua")
+tabs.credits  = dofile(menupath .. DIR_DELIM .. "tab_credits.lua")
 if menustyle == "simple" then
 	tabs.simple_main = dofile(menupath .. DIR_DELIM .. "tab_simple_main.lua")
 else
 	tabs.local_game = dofile(menupath .. DIR_DELIM .. "tab_local.lua")
 	tabs.play_online = dofile(menupath .. DIR_DELIM .. "tab_online.lua")
-	tabs.texturepacks = dofile(menupath .. DIR_DELIM .. "tab_texturepacks.lua")
 end
 
 --------------------------------------------------------------------------------
@@ -150,26 +146,34 @@ local function init_globals()
 
 	if menustyle == "simple" then
 		tv_main:add(tabs.simple_main)
-		tv_main:add(tabs.settings)
 	else
 		tv_main:set_autosave_tab(true)
 		tv_main:add(tabs.local_game)
 		tv_main:add(tabs.play_online)
-		tv_main:add(tabs.settings)
-		tv_main:add(tabs.texturepacks)
 	end
 
-	tv_main:add(tabs.mods)
+	tv_main:add(tabs.content)
+	tv_main:add(tabs.settings)
 	tv_main:add(tabs.credits)
 
 	tv_main:set_global_event_handler(main_event_handler)
 	tv_main:set_fixed_size(false)
 
 	if menustyle ~= "simple" then
-		tv_main:set_tab(core.settings:get("maintab_LAST"))
+		local last_tab = core.settings:get("maintab_LAST")
+		if last_tab and tv_main.current_tab ~= last_tab then
+			tv_main:set_tab(last_tab)
+		end
 	end
 	ui.set_default("maintab")
 	tv_main:show()
+
+	-- Create modstore ui
+	if menustyle == "simple" then
+		modstore.init({x = 12, y = 6}, 3, 2)
+	else
+		modstore.init({x = 12, y = 8}, 4, 3)
+	end
 
 	ui.update()
 
